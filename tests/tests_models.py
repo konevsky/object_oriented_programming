@@ -70,51 +70,51 @@ def test_load_categories_from_json():
             ]
         }
     ]
-    
+
     # Создаем временный файл
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
         json.dump(test_data, f, ensure_ascii=False, indent=2)
         temp_file_path = f.name
-    
+
     try:
         # Сбрасываем счетчики перед загрузкой
         Category.category_count = 0
         Category.product_count = 0
-        
+
         # Загружаем категории
         categories = load_categories_from_json(temp_file_path)
-        
+
         # Проверяем количество загруженных категорий
         assert len(categories) == 2
-        
+
         # Проверяем первую категорию
         category1 = categories[0]
         assert category1.name == "Тестовая категория"
         assert category1.description == "Описание тестовой категории"
         assert len(category1.products) == 2
-        
+
         # Проверяем товары первой категории
         product1 = category1.products[0]
         assert product1.name == "Товар 1"
         assert product1.description == "Описание товара 1"
         assert product1.price == 100.50
         assert product1.quantity == 5
-        
+
         product2 = category1.products[1]
         assert product2.name == "Товар 2"
         assert product2.description == "Описание товара 2"
         assert product2.price == 200.75
         assert product2.quantity == 3
-        
+
         # Проверяем вторую категорию
         category2 = categories[1]
         assert category2.name == "Вторая категория"
         assert len(category2.products) == 1
-        
+
         # Проверяем счетчики класса
         assert Category.category_count == 2
         assert Category.product_count == 3
-        
+
     finally:
         # Удаляем временный файл
         os.unlink(temp_file_path)
@@ -135,7 +135,7 @@ def test_load_categories_from_json_invalid_json():
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
         f.write('{"invalid": json content}')  # Невалидный JSON
         temp_file_path = f.name
-    
+
     try:
         load_categories_from_json(temp_file_path)
         assert False, "Должно было быть исключение json.JSONDecodeError"
