@@ -15,6 +15,28 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    @classmethod
+    def new_product(cls, product_dict: dict) -> 'Product':
+        """
+        Создает объект Product из словаря с параметрами.
+        
+        Args:
+            product_dict: Словарь с параметрами товара.
+                         Ожидаемые ключи: 'name', 'description', 'price', 'quantity'
+        
+        Returns:
+            Созданный объект класса Product
+        
+        Raises:
+            KeyError: Если отсутствуют обязательные ключи в словаре
+        """
+        return cls(
+            name=product_dict['name'],
+            description=product_dict['description'],
+            price=float(product_dict['price']),
+            quantity=int(product_dict['quantity'])
+        )
+
 
 class Category:
     category_count = 0
