@@ -23,11 +23,31 @@ class Category:
     def __init__(self, name: str, description: str, products: List[Product]):
         self.name = name
         self.description = description
-        self.products = products
+        self.__products = products
 
         # обновление атрибутов класса
         Category.category_count += 1
         Category.product_count += len(products)
+
+    def add_product(self, product: Product) -> None:
+        """
+        Добавляет товар в категорию.
+        
+        Args:
+            product: Объект класса Product для добавления
+        """
+        self.__products.append(product)
+        Category.product_count += 1
+
+    @property
+    def products(self) -> List[Product]:
+        """
+        Возвращает список товаров категории (только для чтения).
+        
+        Returns:
+            Список товаров категории
+        """
+        return self.__products
 
 
 def load_categories_from_json(file_path: str) -> List[Category]:
