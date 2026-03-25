@@ -135,3 +135,9 @@ dmypy.json
 .env.local
 *.pkl
 *.pickle
+
+# example
+14.1_main.py
+
+# personal tools
+tools.py
