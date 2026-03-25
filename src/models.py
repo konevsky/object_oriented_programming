@@ -28,7 +28,8 @@ class Product:
     @price.setter
     def price(self, value: float) -> None:
         """
-        Устанавливает цену товара с проверкой на отрицательные значения.
+        Устанавливает цену товара с проверкой на отрицательные значения
+        и подтверждением при понижении цены.
         
         Args:
             value: Новая цена товара
@@ -36,6 +37,14 @@ class Product:
         if value <= 0:
             print("Цена не должна быть нулевая или отрицательная")
             return
+        
+        # Проверяем, понижается ли цена
+        if hasattr(self, '_price') and value < self._price:
+            confirmation = input(f"Цена понижается с {self._price} до {value}. Подтвердите (y/n): ")
+            if confirmation.lower() != 'y':
+                print("Действие отменено")
+                return
+        
         self._price = value
 
     @classmethod
