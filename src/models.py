@@ -12,8 +12,31 @@ class Product:
     ):
         self.name = name
         self.description = description
-        self.price = price
+        self._price = price  # Приватный атрибут цены
         self.quantity = quantity
+
+    @property
+    def price(self) -> float:
+        """
+        Возвращает цену товара.
+        
+        Returns:
+            Цена товара
+        """
+        return self._price
+
+    @price.setter
+    def price(self, value: float) -> None:
+        """
+        Устанавливает цену товара с проверкой на отрицательные значения.
+        
+        Args:
+            value: Новая цена товара
+        """
+        if value <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
+            return
+        self._price = value
 
     @classmethod
     def new_product(cls, product_dict: dict, existing_products: List['Product'] = None) -> 'Product':
@@ -33,9 +56,11 @@ class Product:
         new_product = cls(
             name=product_dict['name'],
             description=product_dict['description'],
-            price=float(product_dict['price']),
+            price=0,  # Временное значение
             quantity=int(product_dict['quantity'])
         )
+        # Устанавливаем цену через сеттер для проверки
+        new_product.price = float(product_dict['price'])
         
         # Проверяем наличие дубликатов, если передан список существующих товаров
         if existing_products:
