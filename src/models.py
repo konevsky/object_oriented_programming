@@ -112,17 +112,7 @@ class Category:
         Category.product_count += 1
 
     @property
-    def products(self) -> List[Product]:
-        """
-        Возвращает список товаров категории (только для чтения).
-        
-        Returns:
-            Список товаров категории
-        """
-        return self.__products
-
-    @property
-    def products_info(self) -> str:
+    def products(self) -> str:
         """
         Возвращает список товаров в виде отформатированных строк.
         
@@ -138,7 +128,16 @@ class Category:
             product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
             products_list.append(product_info)
         
-        return "\n".join(products_list)
+        return "\n".join(products_list) + "\n"  # Добавляем \n в конце по шаблону
+
+    def _get_products_list(self) -> List[Product]:
+        """
+        Внутренний метод для получения списка товаров (для тестов).
+        
+        Returns:
+            Список товаров категории
+        """
+        return self.__products
 
 
 def load_categories_from_json(file_path: str) -> List[Category]:

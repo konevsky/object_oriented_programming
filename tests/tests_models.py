@@ -13,7 +13,7 @@ def test_product_creation():
 def test_category_creation():
     product = Product("Тест", "Описание", 10.0, 1)
     category = Category("Тестовая", "Описание", [product])
-    assert len(category.products) == 1
+    assert len(category._get_products_list()) == 1
 
 
 def test_category_class_counters():
@@ -91,16 +91,16 @@ def test_load_categories_from_json():
         category1 = categories[0]
         assert category1.name == "Тестовая категория"
         assert category1.description == "Описание тестовой категории"
-        assert len(category1.products) == 2
+        assert len(category1._get_products_list()) == 2
 
         # Проверяем товары первой категории
-        product1 = category1.products[0]
+        product1 = category1._get_products_list()[0]
         assert product1.name == "Товар 1"
         assert product1.description == "Описание товара 1"
         assert product1.price == 100.50
         assert product1.quantity == 5
 
-        product2 = category1.products[1]
+        product2 = category1._get_products_list()[1]
         assert product2.name == "Товар 2"
         assert product2.description == "Описание товара 2"
         assert product2.price == 200.75
@@ -109,7 +109,7 @@ def test_load_categories_from_json():
         # Проверяем вторую категорию
         category2 = categories[1]
         assert category2.name == "Вторая категория"
-        assert len(category2.products) == 1
+        assert len(category2._get_products_list()) == 1
 
         # Проверяем счетчики класса
         assert Category.category_count == 2
@@ -170,24 +170,24 @@ def test_category_add_product():
     category = Category("Тест", "Описание", [product1])
     
     initial_count = Category.product_count
-    initial_products_count = len(category.products)
+    initial_products_count = len(category._get_products_list())
     
     product2 = Product("Товар2", "Описание2", 200.0, 3)
     category.add_product(product2)
     
     # Проверяем, что товар добавлен
-    assert len(category.products) == initial_products_count + 1
+    assert len(category._get_products_list()) == initial_products_count + 1
     assert Category.product_count == initial_count + 1
-    assert product2 in category.products
+    assert product2 in category._get_products_list()
 
 
 def test_category_products_info_property():
-    """Тест геттера products_info"""
+    """Тест геттера products"""
     product1 = Product("Товар1", "Описание1", 100.0, 5)
     product2 = Product("Товар2", "Описание2", 200.0, 3)
     category = Category("Тест", "Описание", [product1, product2])
     
-    info = category.products_info
+    info = category.products
     
     # Проверяем формат вывода
     assert "Товар1, 100.0 руб. Остаток: 5 шт." in info
@@ -195,7 +195,7 @@ def test_category_products_info_property():
     
     # Проверяем случай с пустым списком товаров
     empty_category = Category("Пустая", "Описание", [])
-    assert empty_category.products_info == "Товары отсутствуют"
+    assert empty_category.products == "Товары отсутствуют"
 
 
 def test_product_new_product_class_method():
