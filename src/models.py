@@ -16,26 +16,42 @@ class Product:
         self.quantity = quantity
 
     @classmethod
-    def new_product(cls, product_dict: dict) -> 'Product':
+    def new_product(cls, product_dict: dict, existing_products: List['Product'] = None) -> 'Product':
         """
         Создает объект Product из словаря с параметрами.
+        Если товар с таким же именем уже существует в existing_products,
+        то объединяет количество и выбирает более высокую цены.
         
         Args:
             product_dict: Словарь с параметрами товара.
                          Ожидаемые ключи: 'name', 'description', 'price', 'quantity'
+            existing_products: Список существующих товаров для проверки дубликатов
         
         Returns:
-            Созданный объект класса Product
-        
-        Raises:
-            KeyError: Если отсутствуют обязательные ключи в словаре
+            Созданный или обновленный объект класса Product
         """
-        return cls(
+        new_product = cls(
             name=product_dict['name'],
             description=product_dict['description'],
             price=float(product_dict['price']),
             quantity=int(product_dict['quantity'])
         )
+        
+        # Проверяем наличие дубликатов, если передан список существующих товаров
+        if existing_products:
+            for existing_product in existing_products:
+                if existing_product.name.lower() == new_product.name.lower():
+                    # Объединяем количество
+                    existing_product.quantity += new_product.quantity
+                    # Выбираем более высокую цену
+                    if new_product.price > existing_product.price:
+                        existing_product.price = new_product.price
+                    # Обновляем описание, если новое не пустое
+                    if new_product.description and new_product.description.strip():
+                        existing_product.description = new_product.description
+                    return existing_product
+        
+        return new_product
 
 
 class Category:
