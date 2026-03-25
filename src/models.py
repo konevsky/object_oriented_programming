@@ -49,6 +49,25 @@ class Category:
         """
         return self.__products
 
+    @property
+    def products_info(self) -> str:
+        """
+        Возвращает список товаров в виде отформатированных строк.
+        
+        Returns:
+            Строка с информацией о товарах в формате:
+            "Название продукта, 80 руб. Остаток: 15 шт."
+        """
+        if not self.__products:
+            return "Товары отсутствуют"
+        
+        products_list = []
+        for product in self.__products:
+            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
+            products_list.append(product_info)
+        
+        return "\n".join(products_list)
+
 
 def load_categories_from_json(file_path: str) -> List[Category]:
     """
