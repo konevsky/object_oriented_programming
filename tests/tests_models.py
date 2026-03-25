@@ -143,3 +143,156 @@ def test_load_categories_from_json_invalid_json():
         pass  # Ожидаемое исключение
     finally:
         os.unlink(temp_file_path)
+
+
+# Новые тесты для функциональности инкапсуляции
+
+def test_category_private_products_attribute():
+    """Тест того, что атрибут товаров является приватным"""
+    product = Product("Тест", "Описание", 10.0, 1)
+    category = Category("Тестовая", "Описание", [product])
+    
+    # Проверяем, что прямой доступ к __products невозможен
+    try:
+        _ = category.__products
+        assert False, "Должен быть AttributeError при доступе к приватному атрибуту"
+    except AttributeError:
+        pass  # Ожидаемое поведение
+
+
+def test_category_add_product():
+    """Тест метода add_product"""
+    # Сбрасываем счетчики
+    Category.category_count = 0
+    Category.product_count = 0
+    
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    category = Category("Тест", "Описание", [product1])
+    
+    initial_count = Category.product_count
+    initial_products_count = len(category.products)
+    
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    category.add_product(product2)
+    
+    # Проверяем, что товар добавлен
+    assert len(category.products) == initial_products_count + 1
+    assert Category.product_count == initial_count + 1
+    assert product2 in category.products
+
+
+def test_category_products_info_property():
+    """Тест геттера products_info"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    category = Category("Тест", "Описание", [product1, product2])
+    
+    info = category.products_info
+    
+    # Проверяем формат вывода
+    assert "Товар1, 100.0 руб. Остаток: 5 шт." in info
+    assert "Товар2, 200.0 руб. Остаток: 3 шт." in info
+    
+    # Проверяем случай с пустым списком товаров
+    empty_category = Category("Пустая", "Описание", [])
+    assert empty_category.products_info == "Товары отсутствуют"
+
+
+def test_product_new_product_class_method():
+    """Тест класс-метода new_product"""
+    product_dict = {
+        "name": "Товар из словаря",
+        "description": "Описание из словаря",
+        "price": 150.0,
+        "quantity": 7
+    }
+    
+    product = Product.new_product(product_dict)
+    
+    assert product.name == "Товар из словаря"
+    assert product.description == "Описание из словаря"
+    assert product.price == 150.0
+    assert product.quantity == 7
+
+
+def test_product_new_product_with_duplicates():
+    """Тест класс-метода new_product с дубликатами"""
+    # Сбрасываем счетчики
+    Category.category_count = 0
+    Category.product_count = 0
+    
+    # Создаем существующий товар
+    existing_product = Product("Существующий товар", "Старое описание", 100.0, 5)
+    existing_products = [existing_product]
+    
+    # Создаем новый товар с таким же именем
+    duplicate_dict = {
+        "name": "Существующий товар",  # Такое же имя
+        "description": "Новое описание",
+        "price": 150.0,  # Более высокая цена
+        "quantity": 3
+    }
+    
+    result_product = Product.new_product(duplicate_dict, existing_products)
+    
+    # Должен вернуться существующий товар с обновленными данными
+    assert result_product is existing_product
+    assert result_product.quantity == 8  # 5 + 3
+    assert result_product.price == 150.0  # Более высокая цена
+    assert result_product.description == "Новое описание"
+
+
+def test_product_new_product_with_lower_price():
+    """Тест класс-метода new_product с более низкой ценой"""
+    existing_product = Product("Товар", "Описание", 200.0, 5)
+    existing_products = [existing_product]
+    
+    duplicate_dict = {
+        "name": "Товар",
+        "description": "Описание",
+        "price": 150.0,  # Более низкая цена
+        "quantity": 3
+    }
+    
+    result_product = Product.new_product(duplicate_dict, existing_products)
+    
+    # Цена должна остаться высокой
+    assert result_product.price == 200.0
+    assert result_product.quantity == 8
+
+
+def test_product_price_getter():
+    """Тест геттера цены"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    assert product.price == 100.0
+
+
+def test_product_price_setter_valid():
+    """Тест сеттера цены с валидным значением"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    product.price = 150.0
+    assert product.price == 150.0
+
+
+def test_product_price_setter_negative():
+    """Тест сеттера цены с отрицательным значением"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    original_price = product.price
+    
+    # Пытаемся установить отрицательную цену
+    product.price = -50.0
+    
+    # Цена не должна измениться
+    assert product.price == original_price
+
+
+def test_product_price_setter_zero():
+    """Тест сеттера цены с нулевым значением"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    original_price = product.price
+    
+    # Пытаемся установить нулевую цену
+    product.price = 0.0
+    
+    # Цена не должна измениться
+    assert product.price == original_price
