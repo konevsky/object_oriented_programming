@@ -47,6 +47,15 @@ class Product:
         
         self._price = value
 
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление продукта.
+        
+        Returns:
+            Строка в формате "Название продукта, 80 руб. Остаток: 15 шт."
+        """
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
     @classmethod
     def new_product(cls, product_dict: dict, existing_products: List['Product'] = None) -> 'Product':
         """
@@ -123,12 +132,9 @@ class Category:
         if not self.__products:
             return "Товары отсутствуют"
         
-        products_list = []
-        for product in self.__products:
-            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-            products_list.append(product_info)
-        
-        return "\n".join(products_list) + "\n"  # Добавляем \n в конце по шаблону
+        # Используем __str__ для каждого продукта
+        product_strings = [str(product) for product in self.__products]
+        return "\n".join(product_strings) + "\n"  # Добавляем \n в конце по шаблону
 
     def _get_products_list(self) -> List[Product]:
         """
@@ -138,6 +144,16 @@ class Category:
             Список товаров категории
         """
         return self.__products
+
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление категории.
+        
+        Returns:
+            Строка в формате "Название категории, количество продуктов: 200 шт."
+        """
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
 
 def load_categories_from_json(file_path: str) -> List[Category]:
