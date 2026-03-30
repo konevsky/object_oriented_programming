@@ -296,3 +296,78 @@ def test_product_price_setter_zero():
     
     # Цена не должна измениться
     assert product.price == original_price
+
+
+# Новые тесты для функциональности __str__ и __add__
+
+def test_product_str_method():
+    """Тест метода __str__ для Product"""
+    product = Product("Ноутбук", "Игровой ноутбук", 999.99, 5)
+    result = str(product)
+    
+    expected = "Ноутбук, 999.99 руб. Остаток: 5 шт."
+    assert result == expected
+
+
+def test_category_str_method():
+    """Тест метода __str__ для Category"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    category = Category("Электроника", "Товары для компьютеров", [product1, product2])
+    
+    result = str(category)
+    expected = "Электроника, количество продуктов: 8 шт."
+    assert result == expected
+
+
+def test_category_str_method_empty():
+    """Тест метода __str__ для пустой Category"""
+    category = Category("Пустая категория", "Описание", [])
+    
+    result = str(category)
+    expected = "Пустая категория, количество продуктов: 0 шт."
+    assert result == expected
+
+
+def test_product_add_method():
+    """Тест метода __add__ для Product"""
+    product1 = Product("Товар1", "Описание1", 100.0, 10)  # 100 * 10 = 1000
+    product2 = Product("Товар2", "Описание2", 200.0, 2)   # 200 * 2 = 400
+    
+    result = product1 + product2
+    expected = 1000 + 400  # 1400
+    
+    assert result == expected
+
+
+def test_product_add_method_zero_quantity():
+    """Тест метода __add__ с нулевым количеством"""
+    product1 = Product("Товар1", "Описание1", 100.0, 10)  # 100 * 10 = 1000
+    product2 = Product("Товар2", "Описание2", 200.0, 0)   # 200 * 0 = 0
+    
+    result = product1 + product2
+    expected = 1000 + 0  # 1000
+    
+    assert result == expected
+
+
+def test_product_add_method_with_non_product():
+    """Тест метода __add__ с не-Product объектом"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    try:
+        result = product + "не продукт"
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно складывать только объекты класса Product" in str(e)
+
+
+def test_product_add_method_with_none():
+    """Тест метода __add__ с None"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    try:
+        result = product + None
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно складывать только объекты класса Product" in str(e)
