@@ -56,6 +56,23 @@ class Product:
         """
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
+    def __add__(self, other: 'Product') -> float:
+        """
+        Возвращает общую стоимость товаров на складе для двух продуктов.
+        
+        Args:
+            other: Другой объект Product для сложения
+            
+        Returns:
+            Общая стоимость товаров (цена × количество для обоих продуктов)
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты класса Product")
+        
+        total_self = self.price * self.quantity
+        total_other = other.price * other.quantity
+        return total_self + total_other
+
     @classmethod
     def new_product(cls, product_dict: dict, existing_products: List['Product'] = None) -> 'Product':
         """
