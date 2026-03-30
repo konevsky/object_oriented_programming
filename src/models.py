@@ -2,6 +2,48 @@ from typing import List
 import json
 
 
+class ProductIterator:
+    """
+    Вспомогательный класс для итерации по товарам категории.
+    """
+    
+    def __init__(self, category: 'Category'):
+        """
+        Инициализирует итератор для категории.
+        
+        Args:
+            category: Объект категории для итерации
+        """
+        self._products = category._get_products_list()
+        self._index = 0
+    
+    def __iter__(self) -> 'ProductIterator':
+        """
+        Возвращает итератор.
+        
+        Returns:
+            Сам себя
+        """
+        return self
+    
+    def __next__(self) -> 'Product':
+        """
+        Возвращает следующий товар в итерации.
+        
+        Returns:
+            Следующий товар категории
+            
+        Raises:
+            StopIteration: Когда товары закончились
+        """
+        if self._index >= len(self._products):
+            raise StopIteration
+        
+        product = self._products[self._index]
+        self._index += 1
+        return product
+
+
 class Product:
     def __init__(
         self,
@@ -161,6 +203,15 @@ class Category:
             Список товаров категории
         """
         return self.__products
+
+    def get_iterator(self) -> ProductIterator:
+        """
+        Возвращает итератор по товарам категории.
+        
+        Returns:
+            Объект ProductIterator для перебора товаров
+        """
+        return ProductIterator(self)
 
     def __str__(self) -> str:
         """
