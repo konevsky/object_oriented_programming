@@ -1,4 +1,4 @@
-from src.models import Category, Product, load_categories_from_json
+from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json
 import json
 import tempfile
 import os
@@ -460,3 +460,239 @@ def test_product_iterator_in_for_loop():
     assert products_from_loop[0] == product1
     assert products_from_loop[1] == product2
     assert products_from_loop[2] == product3
+
+
+# Тесты для новых классов Smartphone и LawnGrass
+
+def test_smartphone_creation():
+    """Тест создания объекта Smartphone"""
+    smartphone = Smartphone(
+        name="iPhone 15",
+        description="Флагманский смартфон Apple",
+        price=99999.0,
+        quantity=10,
+        efficiency="Высокая",
+        model="A17 Pro",
+        memory=256,
+        color="Синий"
+    )
+    
+    # Проверяем унаследованные атрибуты
+    assert smartphone.name == "iPhone 15"
+    assert smartphone.description == "Флагманский смартфон Apple"
+    assert smartphone.price == 99999.0
+    assert smartphone.quantity == 10
+    
+    # Проверяем новые атрибуты
+    assert smartphone.efficiency == "Высокая"
+    assert smartphone.model == "A17 Pro"
+    assert smartphone.memory == 256
+    assert smartphone.color == "Синий"
+    
+    # Проверяем, что это наследник Product
+    assert isinstance(smartphone, Product)
+
+
+def test_lawn_grass_creation():
+    """Тест создания объекта LawnGrass"""
+    grass = LawnGrass(
+        name="Газонная трава премиум",
+        description="Качественная трава для газона",
+        price=500.0,
+        quantity=50,
+        country="Россия",
+        germination_period="7-10 дней",
+        color="Зеленый"
+    )
+    
+    # Проверяем унаследованные атрибуты
+    assert grass.name == "Газонная трава премиум"
+    assert grass.description == "Качественная трава для газона"
+    assert grass.price == 500.0
+    assert grass.quantity == 50
+    
+    # Проверяем новые атрибуты
+    assert grass.country == "Россия"
+    assert grass.germination_period == "7-10 дней"
+    assert grass.color == "Зеленый"
+    
+    # Проверяем, что это наследник Product
+    assert isinstance(grass, Product)
+
+
+def test_smartphone_str_method():
+    """Тест метода __str__ для Smartphone"""
+    smartphone = Smartphone(
+        name="iPhone 15",
+        description="Флагманский смартфон Apple",
+        price=99999.0,
+        quantity=10,
+        efficiency="Высокая",
+        model="A17 Pro",
+        memory=256,
+        color="Синий"
+    )
+    
+    result = str(smartphone)
+    expected = "iPhone 15, 99999.0 руб. Остаток: 10 шт."
+    assert result == expected
+
+
+def test_lawn_grass_str_method():
+    """Тест метода __str__ для LawnGrass"""
+    grass = LawnGrass(
+        name="Газонная трава премиум",
+        description="Качественная трава для газона",
+        price=500.0,
+        quantity=50,
+        country="Россия",
+        germination_period="7-10 дней",
+        color="Зеленый"
+    )
+    
+    result = str(grass)
+    expected = "Газонная трава премиум, 500.0 руб. Остаток: 50 шт."
+    assert result == expected
+
+
+# Тесты для доработанного метода __add__
+
+def test_add_same_product_types():
+    """Тест сложения товаров одного типа"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    
+    result = product1 + product2
+    expected = 100.0 * 5 + 200.0 * 3  # 500 + 600 = 1100
+    assert result == expected
+
+
+def test_add_same_smartphone_types():
+    """Тест сложения смартфонов одного типа"""
+    phone1 = Smartphone("iPhone 15", "Описание1", 99999.0, 2, "Высокая", "A17", 256, "Синий")
+    phone2 = Smartphone("iPhone 15 Pro", "Описание2", 119999.0, 1, "Очень высокая", "A17 Pro", 512, "Черный")
+    
+    result = phone1 + phone2
+    expected = 99999.0 * 2 + 119999.0 * 1  # 199998 + 119999 = 319997
+    assert result == expected
+
+
+def test_add_same_lawn_grass_types():
+    """Тест сложения трав одного типа"""
+    grass1 = LawnGrass("Трава1", "Описание1", 100.0, 10, "Россия", "7 дней", "Зеленый")
+    grass2 = LawnGrass("Трава2", "Описание2", 150.0, 5, "Беларусь", "10 дней", "Темно-зеленый")
+    
+    result = grass1 + grass2
+    expected = 100.0 * 10 + 150.0 * 5  # 1000 + 750 = 1750
+    assert result == expected
+
+
+def test_add_different_product_types_should_raise_error():
+    """Тест сложения товаров разных типов должно вызывать ошибку"""
+    smartphone = Smartphone("iPhone 15", "Описание", 99999.0, 2, "Высокая", "A17", 256, "Синий")
+    grass = LawnGrass("Газонная трава", "Описание", 500.0, 10, "Россия", "7 дней", "Зеленый")
+    
+    try:
+        result = smartphone + grass
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Нельзя складывать товары разных классов" in str(e)
+        assert "Smartphone" in str(e)
+        assert "LawnGrass" in str(e)
+
+
+def test_add_product_with_smartphone_should_raise_error():
+    """Тест сложения Product со Smartphone должно вызывать ошибку"""
+    product = Product("Обычный товар", "Описание", 100.0, 5)
+    smartphone = Smartphone("iPhone 15", "Описание", 99999.0, 2, "Высокая", "A17", 256, "Синий")
+    
+    try:
+        result = product + smartphone
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Нельзя складывать товары разных классов" in str(e)
+        assert "Product" in str(e)
+        assert "Smartphone" in str(e)
+
+
+# Тесты для доработанного метода add_product
+
+def test_add_product_to_category():
+    """Тест добавления Product в категорию"""
+    category = Category("Электроника", "Описание", [])
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    category.add_product(product)
+    assert len(category._get_products_list()) == 1
+    assert product in category._get_products_list()
+
+
+def test_add_smartphone_to_category():
+    """Тест добавления Smartphone в категорию"""
+    category = Category("Смартфоны", "Описание", [])
+    smartphone = Smartphone("iPhone 15", "Описание", 99999.0, 2, "Высокая", "A17", 256, "Синий")
+    
+    category.add_product(smartphone)
+    assert len(category._get_products_list()) == 1
+    assert smartphone in category._get_products_list()
+
+
+def test_add_lawn_grass_to_category():
+    """Тест добавления LawnGrass в категорию"""
+    category = Category("Сад", "Описание", [])
+    grass = LawnGrass("Газонная трава", "Описание", 500.0, 10, "Россия", "7 дней", "Зеленый")
+    
+    category.add_product(grass)
+    assert len(category._get_products_list()) == 1
+    assert grass in category._get_products_list()
+
+
+def test_add_mixed_products_to_category():
+    """Тест добавления смешанных типов продуктов в категорию"""
+    category = Category("Магазин", "Описание", [])
+    
+    product = Product("Обычный товар", "Описание", 100.0, 5)
+    smartphone = Smartphone("iPhone 15", "Описание", 99999.0, 2, "Высокая", "A17", 256, "Синий")
+    grass = LawnGrass("Газонная трава", "Описание", 500.0, 10, "Россия", "7 дней", "Зеленый")
+    
+    category.add_product(product)
+    category.add_product(smartphone)
+    category.add_product(grass)
+    
+    assert len(category._get_products_list()) == 3
+    assert product in category._get_products_list()
+    assert smartphone in category._get_products_list()
+    assert grass in category._get_products_list()
+
+
+def test_add_non_product_to_category_should_raise_error():
+    """Тест добавления не-Product объекта в категорию должно вызывать ошибку"""
+    category = Category("Магазин", "Описание", [])
+    
+    try:
+        category.add_product("не продукт")
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+
+
+def test_add_none_to_category_should_raise_error():
+    """Тест добавления None в категорию должно вызывать ошибку"""
+    category = Category("Магазин", "Описание", [])
+    
+    try:
+        category.add_product(None)
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+
+
+def test_add_number_to_category_should_raise_error():
+    """Тест добавления числа в категорию должно вызывать ошибку"""
+    category = Category("Магазин", "Описание", [])
+    
+    try:
+        category.add_product(123)
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
