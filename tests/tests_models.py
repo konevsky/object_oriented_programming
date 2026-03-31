@@ -296,3 +296,167 @@ def test_product_price_setter_zero():
     
     # Цена не должна измениться
     assert product.price == original_price
+
+
+# Новые тесты для функциональности __str__ и __add__
+
+def test_product_str_method():
+    """Тест метода __str__ для Product"""
+    product = Product("Ноутбук", "Игровой ноутбук", 999.99, 5)
+    result = str(product)
+    
+    expected = "Ноутбук, 999.99 руб. Остаток: 5 шт."
+    assert result == expected
+
+
+def test_category_str_method():
+    """Тест метода __str__ для Category"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    category = Category("Электроника", "Товары для компьютеров", [product1, product2])
+    
+    result = str(category)
+    expected = "Электроника, количество продуктов: 8 шт."
+    assert result == expected
+
+
+def test_category_str_method_empty():
+    """Тест метода __str__ для пустой Category"""
+    category = Category("Пустая категория", "Описание", [])
+    
+    result = str(category)
+    expected = "Пустая категория, количество продуктов: 0 шт."
+    assert result == expected
+
+
+def test_product_add_method():
+    """Тест метода __add__ для Product"""
+    product1 = Product("Товар1", "Описание1", 100.0, 10)  # 100 * 10 = 1000
+    product2 = Product("Товар2", "Описание2", 200.0, 2)   # 200 * 2 = 400
+    
+    result = product1 + product2
+    expected = 1000 + 400  # 1400
+    
+    assert result == expected
+
+
+def test_product_add_method_zero_quantity():
+    """Тест метода __add__ с нулевым количеством"""
+    product1 = Product("Товар1", "Описание1", 100.0, 10)  # 100 * 10 = 1000
+    product2 = Product("Товар2", "Описание2", 200.0, 0)   # 200 * 0 = 0
+    
+    result = product1 + product2
+    expected = 1000 + 0  # 1000
+    
+    assert result == expected
+
+
+def test_product_add_method_with_non_product():
+    """Тест метода __add__ с не-Product объектом"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    try:
+        result = product + "не продукт"
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно складывать только объекты класса Product" in str(e)
+
+
+def test_product_add_method_with_none():
+    """Тест метода __add__ с None"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    try:
+        result = product + None
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Можно складывать только объекты класса Product" in str(e)
+
+
+# Тесты для дополнительного задания - ProductIterator
+
+def test_product_iterator():
+    """Тест класса ProductIterator"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    product3 = Product("Товар3", "Описание3", 300.0, 2)
+    
+    category = Category("Тест категория", "Описание", [product1, product2, product3])
+    iterator = category.get_iterator()
+    
+    # Преобразуем итератор в список для проверки
+    products = list(iterator)
+    
+    # Проверяем, что все товары возвращены
+    assert len(products) == 3
+    assert products[0] == product1
+    assert products[1] == product2
+    assert products[2] == product3
+
+
+def test_product_iterator_empty_category():
+    """Тест итератора для пустой категории"""
+    category = Category("Пустая категория", "Описание", [])
+    iterator = category.get_iterator()
+    
+    # Преобразуем итератор в список для проверки
+    products = list(iterator)
+    
+    # Проверяем, что список пуст
+    assert len(products) == 0
+
+
+def test_product_iterator_single_product():
+    """Тест итератора с одним товаром"""
+    product = Product("Один товар", "Описание", 100.0, 5)
+    category = Category("Категория", "Описание", [product])
+    iterator = category.get_iterator()
+    
+    # Преобразуем итератор в список для проверки
+    products = list(iterator)
+    
+    # Проверяем, что возвращен один товар
+    assert len(products) == 1
+    assert products[0] == product
+
+
+def test_product_iterator_multiple_iterations():
+    """Тест нескольких итераций по одному и тому же итератору"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    
+    category = Category("Тест категория", "Описание", [product1, product2])
+    iterator = category.get_iterator()
+    
+    # Первая итерация
+    products1 = list(iterator)
+    assert len(products1) == 2
+    
+    # Вторая итерация (должна вернуть пустой список, так как итератор уже использован)
+    products2 = list(iterator)
+    assert len(products2) == 0
+    
+    # Создаем новый итератор для новой итерации
+    new_iterator = category.get_iterator()
+    products3 = list(new_iterator)
+    assert len(products3) == 2
+
+
+def test_product_iterator_in_for_loop():
+    """Тест использования итератора в цикле for"""
+    product1 = Product("Товар1", "Описание1", 100.0, 5)
+    product2 = Product("Товар2", "Описание2", 200.0, 3)
+    product3 = Product("Товар3", "Описание3", 300.0, 2)
+    
+    category = Category("Тест категория", "Описание", [product1, product2, product3])
+    
+    # Используем итератор в цикле for
+    products_from_loop = []
+    for product in category.get_iterator():
+        products_from_loop.append(product)
+    
+    # Проверяем, что все товары собраны
+    assert len(products_from_loop) == 3
+    assert products_from_loop[0] == product1
+    assert products_from_loop[1] == product2
+    assert products_from_loop[2] == product3

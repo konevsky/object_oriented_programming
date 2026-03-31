@@ -2,6 +2,48 @@ from typing import List
 import json
 
 
+class ProductIterator:
+    """
+    Вспомогательный класс для итерации по товарам категории.
+    """
+    
+    def __init__(self, category: 'Category'):
+        """
+        Инициализирует итератор для категории.
+        
+        Args:
+            category: Объект категории для итерации
+        """
+        self._products = category._get_products_list()
+        self._index = 0
+    
+    def __iter__(self) -> 'ProductIterator':
+        """
+        Возвращает итератор.
+        
+        Returns:
+            Сам себя
+        """
+        return self
+    
+    def __next__(self) -> 'Product':
+        """
+        Возвращает следующий товар в итерации.
+        
+        Returns:
+            Следующий товар категории
+            
+        Raises:
+            StopIteration: Когда товары закончились
+        """
+        if self._index >= len(self._products):
+            raise StopIteration
+        
+        product = self._products[self._index]
+        self._index += 1
+        return product
+
+
 class Product:
     def __init__(
         self,
@@ -46,6 +88,32 @@ class Product:
                 return
         
         self._price = value
+
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление продукта.
+        
+        Returns:
+            Строка в формате "Название продукта, 80 руб. Остаток: 15 шт."
+        """
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: 'Product') -> float:
+        """
+        Возвращает общую стоимость товаров на складе для двух продуктов.
+        
+        Args:
+            other: Другой объект Product для сложения
+            
+        Returns:
+            Общая стоимость товаров (цена × количество для обоих продуктов)
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты класса Product")
+        
+        total_self = self.price * self.quantity
+        total_other = other.price * other.quantity
+        return total_self + total_other
 
     @classmethod
     def new_product(cls, product_dict: dict, existing_products: List['Product'] = None) -> 'Product':
@@ -123,12 +191,9 @@ class Category:
         if not self.__products:
             return "Товары отсутствуют"
         
-        products_list = []
-        for product in self.__products:
-            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-            products_list.append(product_info)
-        
-        return "\n".join(products_list) + "\n"  # Добавляем \n в конце по шаблону
+        # Используем __str__ для каждого продукта
+        product_strings = [str(product) for product in self.__products]
+        return "\n".join(product_strings) + "\n"  # Добавляем \n в конце по шаблону
 
     def _get_products_list(self) -> List[Product]:
         """
@@ -138,6 +203,25 @@ class Category:
             Список товаров категории
         """
         return self.__products
+
+    def get_iterator(self) -> ProductIterator:
+        """
+        Возвращает итератор по товарам категории.
+        
+        Returns:
+            Объект ProductIterator для перебора товаров
+        """
+        return ProductIterator(self)
+
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление категории.
+        
+        Returns:
+            Строка в формате "Название категории, количество продуктов: 200 шт."
+        """
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
 
 def load_categories_from_json(file_path: str) -> List[Category]:
