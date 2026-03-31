@@ -107,9 +107,16 @@ class Product:
             
         Returns:
             Общая стоимость товаров (цена × количество для обоих продуктов)
+            
+        Raises:
+            TypeError: если типы объектов не совпадают
         """
         if not isinstance(other, Product):
             raise TypeError("Можно складывать только объекты класса Product")
+        
+        # Проверяем, что объекты принадлежат одному и тому же классу
+        if type(self) != type(other):
+            raise TypeError(f"Нельзя складывать товары разных классов: {type(self).__name__} и {type(other).__name__}")
         
         total_self = self.price * self.quantity
         total_other = other.price * other.quantity
