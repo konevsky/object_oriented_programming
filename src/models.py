@@ -178,11 +178,17 @@ class Category:
 
     def add_product(self, product: Product) -> None:
         """
-        Добавляет товар в категорию.
+        Добавляет товар в категорию с проверкой типа.
         
         Args:
-            product: Объект класса Product для добавления
+            product: Объект класса Product или его наследников для добавления
+            
+        Raises:
+            TypeError: если переданный объект не является Product или его наследником
         """
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+        
         self.__products.append(product)
         Category.product_count += 1
 
