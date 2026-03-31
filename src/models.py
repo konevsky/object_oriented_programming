@@ -262,3 +262,72 @@ def load_categories_from_json(file_path: str) -> List[Category]:
         categories.append(category)
 
     return categories
+
+
+class Smartphone(Product):
+    """
+    Класс для представления смартфонов, наследник от Product.
+    """
+    
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: str,
+        model: str,
+        memory: int,
+        color: str,
+    ):
+        """
+        Инициализирует смартфон с дополнительными атрибутами.
+        
+        Args:
+            name: Название смартфона
+            description: Описание смартфона
+            price: Цена смартфона
+            quantity: Количество на складе
+            efficiency: Производительность
+            model: Модель
+            memory: Объем встроенной памяти в ГБ
+            color: Цвет
+        """
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+class LawnGrass(Product):
+    """
+    Класс для представления газонной травы, наследник от Product.
+    """
+    
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: str,
+        color: str,
+    ):
+        """
+        Инициализирует газонную траву с дополнительными атрибутами.
+        
+        Args:
+            name: Название травы
+            description: Описание травы
+            price: Цена травы
+            quantity: Количество на складе
+            country: Страна-производитель
+            germination_period: Срок прорастания
+            color: Цвет
+        """
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
