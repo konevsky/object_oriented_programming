@@ -43,8 +43,8 @@ class CreationMixin:
         """
         Инициализирует объект и логирует его создание.
         """
-        super().__init__(*args, **kwargs)
         print(f"Создан объект класса {self.__class__.__name__} с параметрами: {args}")
+        super().__init__(*args, **kwargs)
     
     def __repr__(self) -> str:
         """

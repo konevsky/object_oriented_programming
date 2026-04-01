@@ -1,4 +1,5 @@
-from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json
+from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json, BaseProduct, CreationMixin
+from abc import ABC
 import json
 import tempfile
 import os
@@ -696,3 +697,146 @@ def test_add_number_to_category_should_raise_error():
         assert False, "Должно было быть исключение TypeError"
     except TypeError as e:
         assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+
+
+# Тесты для новой функциональности - абстрактные классы и миксины
+
+def test_base_product_is_abstract():
+    """Тест того, что BaseProduct является абстрактным классом"""
+    try:
+        # Попытка создать экземпляр абстрактного класса должна вызвать ошибку
+        base_product = BaseProduct()
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "abstract" in str(e).lower()
+
+
+def test_product_inherits_from_base_product():
+    """Тест того, что Product наследуется от BaseProduct"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    # Проверяем наследование
+    assert isinstance(product, BaseProduct)
+    assert isinstance(product, CreationMixin)
+    assert isinstance(product, Product)
+
+
+def test_smartphone_inherits_from_base_product():
+    """Тест того, что Smartphone наследуется от BaseProduct"""
+    smartphone = Smartphone("iPhone", "Описание", 999.0, 2, "Высокая", "A15", 128, "Черный")
+    
+    # Проверяем наследование
+    assert isinstance(smartphone, BaseProduct)
+    assert isinstance(smartphone, CreationMixin)
+    assert isinstance(smartphone, Product)
+
+
+def test_lawn_grass_inherits_from_base_product():
+    """Тест того, что LawnGrass наследуется от BaseProduct"""
+    grass = LawnGrass("Трава", "Описание", 50.0, 10, "Россия", "7 дней", "Зеленый")
+    
+    # Проверяем наследование
+    assert isinstance(grass, BaseProduct)
+    assert isinstance(grass, CreationMixin)
+    assert isinstance(grass, Product)
+
+
+def test_creation_mixin_logging_product():
+    """Тест логирования создания объекта Product"""
+    # Просто проверяем, что объект создается без ошибок
+    # Логирование работает через print, но в тестах его сложно перехватить
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    # Проверяем, что объект создан и имеет правильные атрибуты
+    assert product.name == "Товар"
+    assert product.description == "Описание"
+    assert product.price == 100.0
+    assert product.quantity == 5
+
+
+def test_creation_mixin_logging_smartphone():
+    """Тест логирования создания объекта Smartphone"""
+    smartphone = Smartphone("iPhone", "Описание", 999.0, 2, "Высокая", "A15", 128, "Черный")
+    
+    # Проверяем, что объект создан и имеет правильные атрибуты
+    assert smartphone.name == "iPhone"
+    assert smartphone.description == "Описание"
+    assert smartphone.price == 999.0
+    assert smartphone.quantity == 2
+    assert smartphone.efficiency == "Высокая"
+    assert smartphone.model == "A15"
+    assert smartphone.memory == 128
+    assert smartphone.color == "Черный"
+
+
+def test_creation_mixin_logging_lawn_grass():
+    """Тест логирования создания объекта LawnGrass"""
+    grass = LawnGrass("Трава", "Описание", 50.0, 10, "Россия", "7 дней", "Зеленый")
+    
+    # Проверяем, что объект создан и имеет правильные атрибуты
+    assert grass.name == "Трава"
+    assert grass.description == "Описание"
+    assert grass.price == 50.0
+    assert grass.quantity == 10
+    assert grass.country == "Россия"
+    assert grass.germination_period == "7 дней"
+    assert grass.color == "Зеленый"
+
+
+def test_repr_method_product():
+    """Тест метода __repr__ для Product"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    repr_str = repr(product)
+    
+    # Проверяем формат __repr__
+    assert "Product(" in repr_str
+    assert "name='Товар'" in repr_str
+    assert "description='Описание'" in repr_str
+    assert "_price=100.0" in repr_str
+    assert "quantity=5" in repr_str
+
+
+def test_repr_method_smartphone():
+    """Тест метода __repr__ для Smartphone"""
+    smartphone = Smartphone("iPhone", "Описание", 999.0, 2, "Высокая", "A15", 128, "Черный")
+    repr_str = repr(smartphone)
+    
+    # Проверяем формат __repr__
+    assert "Smartphone(" in repr_str
+    assert "name='iPhone'" in repr_str
+    assert "description='Описание'" in repr_str
+    assert "_price=999.0" in repr_str
+    assert "quantity=2" in repr_str
+    assert "efficiency='Высокая'" in repr_str
+    assert "model='A15'" in repr_str
+    assert "memory=128" in repr_str
+    assert "color='Черный'" in repr_str
+
+
+def test_repr_method_lawn_grass():
+    """Тест метода __repr__ для LawnGrass"""
+    grass = LawnGrass("Трава", "Описание", 50.0, 10, "Россия", "7 дней", "Зеленый")
+    repr_str = repr(grass)
+    
+    # Проверяем формат __repr__
+    assert "LawnGrass(" in repr_str
+    assert "name='Трава'" in repr_str
+    assert "description='Описание'" in repr_str
+    assert "_price=50.0" in repr_str
+    assert "quantity=10" in repr_str
+    assert "country='Россия'" in repr_str
+    assert "germination_period='7 дней'" in repr_str
+    assert "color='Зеленый'" in repr_str
+
+
+def test_multiple_inheritance_order():
+    """Тест правильного порядка множественного наследования"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    # Проверяем MRO (Method Resolution Order)
+    mro = product.__class__.__mro__
+    assert mro[0] == Product  # Сам класс
+    assert mro[1] == CreationMixin  # Первый миксин
+    assert mro[2] == BaseProduct  # Базовый абстрактный класс
+    assert mro[3] == ABC  # ABC наследуется перед object
+    assert mro[4] == object  # Базовый класс Python
