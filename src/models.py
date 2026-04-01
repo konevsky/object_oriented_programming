@@ -33,6 +33,33 @@ class BaseProduct(ABC):
         pass
 
 
+class CreationMixin:
+    """
+    Миксин для логирования создания объектов.
+    Печатает информацию о создании объекта в консоль.
+    """
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Инициализирует объект и логирует его создание.
+        """
+        super().__init__(*args, **kwargs)
+        print(f"Создан объект класса {self.__class__.__name__} с параметрами: {args}")
+    
+    def __repr__(self) -> str:
+        """
+        Возвращает представление объекта для отладки.
+        
+        Returns:
+            Строка с именем класса и параметрами
+        """
+        class_name = self.__class__.__name__
+        attrs = []
+        for key, value in self.__dict__.items():
+            attrs.append(f"{key}={repr(value)}")
+        return f"{class_name}({', '.join(attrs)})"
+
+
 class ProductIterator:
     """
     Вспомогательный класс для итерации по товарам категории.
@@ -75,7 +102,7 @@ class ProductIterator:
         return product
 
 
-class Product(BaseProduct):
+class Product(CreationMixin, BaseProduct):
     def __init__(
         self,
         name: str,
