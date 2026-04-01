@@ -1,5 +1,36 @@
 from typing import List
 import json
+from abc import ABC, abstractmethod
+
+
+class BaseProduct(ABC):
+    """
+    Абстрактный базовый класс для всех продуктов.
+    Определяет общую функциональность, которая должна быть у каждого продукта.
+    """
+    
+    @abstractmethod
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление продукта.
+        
+        Returns:
+            Строка с информацией о продукте
+        """
+        pass
+    
+    @abstractmethod
+    def __add__(self, other: 'BaseProduct') -> float:
+        """
+        Возвращает общую стоимость товаров на складе для двух продуктов.
+        
+        Args:
+            other: Другой объект продукта для сложения
+            
+        Returns:
+            Общая стоимость товаров
+        """
+        pass
 
 
 class ProductIterator:
@@ -44,7 +75,7 @@ class ProductIterator:
         return product
 
 
-class Product:
+class Product(BaseProduct):
     def __init__(
         self,
         name: str,
