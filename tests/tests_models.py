@@ -1,4 +1,4 @@
-from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json, BaseProduct, CreationMixin
+from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json, BaseProduct, CreationMixin, Order, BaseEntity
 from abc import ABC
 import json
 import tempfile
@@ -840,3 +840,150 @@ def test_multiple_inheritance_order():
     assert mro[2] == BaseProduct  # Базовый абстрактный класс
     assert mro[3] == ABC  # ABC наследуется перед object
     assert mro[4] == object  # Базовый класс Python
+
+
+# Тесты для дополнительного задания - класс Order и BaseEntity
+
+def test_base_entity_is_abstract():
+    """Тест того, что BaseEntity является абстрактным классом"""
+    try:
+        # Попытка создать экземпляр абстрактного класса должна вызвать ошибку
+        base_entity = BaseEntity()
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "abstract" in str(e).lower()
+
+
+def test_order_creation():
+    """Тест создания заказа"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    initial_quantity = product.quantity
+    
+    order = Order(product, 3)
+    
+    # Проверяем атрибуты заказа
+    assert order.product == product
+    assert order.quantity == 3
+    assert order.total_cost == 300.0  # 100.0 * 3
+    
+    # Проверяем, что количество товара уменьшилось
+    assert product.quantity == initial_quantity - 3  # 10 - 3 = 7
+
+
+def test_order_str_method():
+    """Тест метода __str__ для Order"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    order = Order(product, 3)
+    
+    result = str(order)
+    expected = "Заказ: Товар, количество: 3 шт., итоговая стоимость: 300.0 руб."
+    assert result == expected
+
+
+def test_order_repr_method():
+    """Тест метода __repr__ для Order"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    order = Order(product, 3)
+    
+    result = repr(order)
+    assert "Order(" in result
+    assert "quantity=3" in result
+    assert "total_cost=300.0" in result
+
+
+def test_order_inherits_from_base_entity():
+    """Тест того, что Order наследуется от BaseEntity"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    order = Order(product, 3)
+    
+    # Проверяем наследование
+    assert isinstance(order, BaseEntity)
+    assert isinstance(order, Order)
+
+
+def test_category_inherits_from_base_entity():
+    """Тест того, что Category наследуется от BaseEntity"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    category = Category("Категория", "Описание", [product])
+    
+    # Проверяем наследование
+    assert isinstance(category, BaseEntity)
+    assert isinstance(category, Category)
+
+
+def test_order_with_smartphone():
+    """Тест заказа со смартфоном"""
+    smartphone = Smartphone("iPhone", "Описание", 999.0, 5, "Высокая", "A15", 128, "Черный")
+    order = Order(smartphone, 2)
+    
+    assert order.product == smartphone
+    assert order.quantity == 2
+    assert order.total_cost == 1998.0  # 999.0 * 2
+    assert smartphone.quantity == 3  # 5 - 2
+
+
+def test_order_with_lawn_grass():
+    """Тест заказа с газонной травой"""
+    grass = LawnGrass("Трава", "Описание", 50.0, 20, "Россия", "7 дней", "Зеленый")
+    order = Order(grass, 5)
+    
+    assert order.product == grass
+    assert order.quantity == 5
+    assert order.total_cost == 250.0  # 50.0 * 5
+    assert grass.quantity == 15  # 20 - 5
+
+
+def test_order_with_invalid_product_type():
+    """Тест заказа с неверным типом продукта"""
+    try:
+        order = Order("не продукт", 3)
+        assert False, "Должно было быть исключение TypeError"
+    except TypeError as e:
+        assert "Товар должен быть наследником BaseProduct" in str(e)
+
+
+def test_order_with_negative_quantity():
+    """Тест заказа с отрицательным количеством"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    
+    try:
+        order = Order(product, -1)
+        assert False, "Должно было быть исключение ValueError"
+    except ValueError as e:
+        assert "Количество товара должно быть положительным" in str(e)
+
+
+def test_order_with_zero_quantity():
+    """Тест заказа с нулевым количеством"""
+    product = Product("Товар", "Описание", 100.0, 10)
+    
+    try:
+        order = Order(product, 0)
+        assert False, "Должно было быть исключение ValueError"
+    except ValueError as e:
+        assert "Количество товара должно быть положительным" in str(e)
+
+
+def test_order_with_insufficient_stock():
+    """Тест заказа с недостаточным количеством товара на складе"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    try:
+        order = Order(product, 10)  # Запрашиваем больше, чем есть
+        assert False, "Должно было быть исключение ValueError"
+    except ValueError as e:
+        assert "Недостаточно товара на складе" in str(e)
+        assert "Доступно: 5" in str(e)
+        assert "запрошено: 10" in str(e)
+
+
+def test_order_edge_case_exact_stock():
+    """Тест заказа с точным количеством товара на складе"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    # Должно сработать - запрашиваем ровно столько, сколько есть
+    order = Order(product, 5)
+    
+    assert order.quantity == 5
+    assert order.total_cost == 500.0  # 100.0 * 5
+    assert product.quantity == 0  # Все товары забраны

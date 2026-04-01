@@ -60,6 +60,70 @@ class CreationMixin:
         return f"{class_name}({', '.join(attrs)})"
 
 
+class BaseEntity(ABC):
+    """
+    Абстрактный базовый класс для сущностей с общими свойствами.
+    """
+    
+    @abstractmethod
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление сущности.
+        
+        Returns:
+            Строка с информацией о сущности
+        """
+        pass
+
+
+class Order(BaseEntity):
+    """
+    Класс для представления заказа.
+    """
+    
+    def __init__(self, product: BaseProduct, quantity: int):
+        """
+        Инициализирует заказ.
+        
+        Args:
+            product: Товар, который был куплен
+            quantity: Количество купленного товара
+        """
+        if not isinstance(product, BaseProduct):
+            raise TypeError("Товар должен быть наследником BaseProduct")
+        
+        if quantity <= 0:
+            raise ValueError("Количество товара должно быть положительным")
+        
+        if quantity > product.quantity:
+            raise ValueError(f"Недостаточно товара на складе. Доступно: {product.quantity}, запрошено: {quantity}")
+        
+        self.product = product
+        self.quantity = quantity
+        self.total_cost = product.price * quantity
+        
+        # Уменьшаем количество товара на складе
+        product.quantity -= quantity
+    
+    def __str__(self) -> str:
+        """
+        Возвращает строковое представление заказа.
+        
+        Returns:
+            Строка с информацией о заказе
+        """
+        return f"Заказ: {self.product.name}, количество: {self.quantity} шт., итоговая стоимость: {self.total_cost} руб."
+    
+    def __repr__(self) -> str:
+        """
+        Возвращает представление заказа для отладки.
+        
+        Returns:
+            Строка с параметрами заказа
+        """
+        return f"Order(product={repr(self.product)}, quantity={self.quantity}, total_cost={self.total_cost})"
+
+
 class ProductIterator:
     """
     Вспомогательный класс для итерации по товарам категории.
@@ -221,7 +285,7 @@ class Product(CreationMixin, BaseProduct):
         return new_product
 
 
-class Category:
+class Category(BaseEntity):
     category_count = 0
     product_count = 0
 
