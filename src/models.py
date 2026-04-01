@@ -8,25 +8,25 @@ class BaseProduct(ABC):
     Абстрактный базовый класс для всех продуктов.
     Определяет общую функциональность, которая должна быть у каждого продукта.
     """
-    
+
     @abstractmethod
     def __str__(self) -> str:
         """
         Возвращает строковое представление продукта.
-        
+
         Returns:
             Строка с информацией о продукте
         """
         pass
-    
+
     @abstractmethod
-    def __add__(self, other: 'BaseProduct') -> float:
+    def __add__(self, other: "BaseProduct") -> float:
         """
         Возвращает общую стоимость товаров на складе для двух продуктов.
-        
+
         Args:
             other: Другой объект продукта для сложения
-            
+
         Returns:
             Общая стоимость товаров
         """
@@ -38,18 +38,18 @@ class CreationMixin:
     Миксин для логирования создания объектов.
     Печатает информацию о создании объекта в консоль.
     """
-    
+
     def __init__(self, *args, **kwargs):
         """
         Инициализирует объект и логирует его создание.
         """
         print(f"Создан объект класса {self.__class__.__name__} с параметрами: {args}")
         super().__init__(*args, **kwargs)
-    
+
     def __repr__(self) -> str:
         """
         Возвращает представление объекта для отладки.
-        
+
         Returns:
             Строка с именем класса и параметрами
         """
@@ -64,12 +64,12 @@ class BaseEntity(ABC):
     """
     Абстрактный базовый класс для сущностей с общими свойствами.
     """
-    
+
     @abstractmethod
     def __str__(self) -> str:
         """
         Возвращает строковое представление сущности.
-        
+
         Returns:
             Строка с информацией о сущности
         """
@@ -80,44 +80,46 @@ class Order(BaseEntity):
     """
     Класс для представления заказа.
     """
-    
+
     def __init__(self, product: BaseProduct, quantity: int):
         """
         Инициализирует заказ.
-        
+
         Args:
             product: Товар, который был куплен
             quantity: Количество купленного товара
         """
         if not isinstance(product, BaseProduct):
             raise TypeError("Товар должен быть наследником BaseProduct")
-        
+
         if quantity <= 0:
             raise ValueError("Количество товара должно быть положительным")
-        
+
         if quantity > product.quantity:
             raise ValueError(f"Недостаточно товара на складе. Доступно: {product.quantity}, запрошено: {quantity}")
-        
+
         self.product = product
         self.quantity = quantity
         self.total_cost = product.price * quantity
-        
+
         # Уменьшаем количество товара на складе
         product.quantity -= quantity
-    
+
     def __str__(self) -> str:
         """
         Возвращает строковое представление заказа.
-        
+
         Returns:
             Строка с информацией о заказе
         """
-        return f"Заказ: {self.product.name}, количество: {self.quantity} шт., итоговая стоимость: {self.total_cost} руб."
-    
+        return (
+            f"Заказ: {self.product.name}, количество: {self.quantity} шт., итоговая стоимость: {self.total_cost} руб."
+        )
+
     def __repr__(self) -> str:
         """
         Возвращает представление заказа для отладки.
-        
+
         Returns:
             Строка с параметрами заказа
         """
