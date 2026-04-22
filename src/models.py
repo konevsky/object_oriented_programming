@@ -184,7 +184,7 @@ class Product(CreationMixin, BaseProduct):
         quantity: int,
     ):
         if quantity == 0:
-            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+            raise ZeroQuantityError("Tovar s nulevym kolichestvom ne mozhet byt' dobavlen")
         
         self.name = name
         self.description = description
@@ -312,7 +312,7 @@ class Category(BaseEntity):
 
     def add_product(self, product: Product) -> None:
         """
-        Добавляет товар в категорию с проверкой типа.
+        Добавляет товар в категорию с проверкой типа и обработкой ошибок.
 
         Args:
             product: Объект класса Product или его наследников для добавления
@@ -320,11 +320,24 @@ class Category(BaseEntity):
         Raises:
             TypeError: если переданный объект не является Product или его наследником
         """
-        if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+        try:
+            if not isinstance(product, Product):
+                raise TypeError("Можно добавлять только объекты класса Product или его наследников")
 
-        self.__products.append(product)
-        Category.product_count += 1
+            if product.quantity == 0:
+                raise ZeroQuantityError("Tovar s nulevym kolichestvom ne mozhet byt' dobavlen v kategoriyu")
+
+            self.__products.append(product)
+            Category.product_count += 1
+            print(f"Tovar '{product.name}' uspeshno dobavlen v kategoriyu")
+        except ZeroQuantityError as e:
+            print(f"Oshibka: {e}")
+        except TypeError as e:
+            print(f"Oshibka tipa: {e}")
+        else:
+            print("Tovar uspeshno dobavlen")
+        finally:
+            print("Obrabotka dobavleniya tovara zavershena")
 
     @property
     def products(self) -> str:
