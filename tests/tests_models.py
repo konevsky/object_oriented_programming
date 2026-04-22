@@ -348,8 +348,8 @@ def test_product_add_method_zero_quantity():
     # Теперь создание товара с нулевым количеством должно вызывать исключение
     try:
         product2 = Product("Товар2", "Описание2", 200.0, 0)   # 200 * 0 = 0
-        assert False, "Должно быть исключение ZeroQuantityError"
-    except ZeroQuantityError as e:
+        assert False, "Должно быть исключение ValueError"
+    except ValueError as e:
         assert "Товар с нулевым количеством не может быть добавлен" in str(e)
 
 
@@ -997,8 +997,8 @@ def test_product_zero_quantity_error():
     """Тест создания товара с нулевым количеством"""
     try:
         product = Product("Товар", "Описание", 100.0, 0)
-        assert False, "Должно было быть исключение ZeroQuantityError"
-    except ZeroQuantityError as e:
+        assert False, "Должно было быть исключение ValueError"
+    except ValueError as e:
         assert "Товар с нулевым количеством не может быть добавлен" in str(e)
 
 

@@ -184,7 +184,7 @@ class Product(CreationMixin, BaseProduct):
         quantity: int,
     ):
         if quantity == 0:
-            raise ZeroQuantityError("Tovar s nulevym kolichestvom ne mozhet byt' dobavlen")
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
         
         self.name = name
         self.description = description
@@ -325,7 +325,7 @@ class Category(BaseEntity):
                 raise TypeError("Можно добавлять только объекты класса Product или его наследников")
 
             if product.quantity == 0:
-                raise ZeroQuantityError("Tovar s nulevym kolichestvom ne mozhet byt' dobavlen v kategoriyu")
+                raise ZeroQuantityError("Товар с нулевым количеством не может быть добавлен в категорию")
 
             self.__products.append(product)
             Category.product_count += 1
