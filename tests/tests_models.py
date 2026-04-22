@@ -344,12 +344,13 @@ def test_product_add_method():
 def test_product_add_method_zero_quantity():
     """Тест метода __add__ с нулевым количеством"""
     product1 = Product("Товар1", "Описание1", 100.0, 10)  # 100 * 10 = 1000
-    product2 = Product("Товар2", "Описание2", 200.0, 0)   # 200 * 0 = 0
     
-    result = product1 + product2
-    expected = 1000 + 0  # 1000
-    
-    assert result == expected
+    # Теперь создание товара с нулевым количеством должно вызывать исключение
+    try:
+        product2 = Product("Товар2", "Описание2", 200.0, 0)   # 200 * 0 = 0
+        assert False, "Должно быть исключение ZeroQuantityError"
+    except ZeroQuantityError as e:
+        assert "Товар с нулевым количеством не может быть добавлен" in str(e)
 
 
 def test_product_add_method_with_non_product():
@@ -667,36 +668,39 @@ def test_add_mixed_products_to_category():
 
 
 def test_add_non_product_to_category_should_raise_error():
-    """Тест добавления не-Product объекта в категорию должно вызывать ошибку"""
+    """Тест добавления не-Product объекта в категорию должно обрабатывать ошибку"""
     category = Category("Магазин", "Описание", [])
     
-    try:
-        category.add_product("не продукт")
-        assert False, "Должно было быть исключение TypeError"
-    except TypeError as e:
-        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+    # Теперь add_product обрабатывает исключения внутри, не передает их дальше
+    initial_count = len(category._get_products_list())
+    category.add_product("не продукт")
+    
+    # Товар не должен быть добавлен
+    assert len(category._get_products_list()) == initial_count
 
 
 def test_add_none_to_category_should_raise_error():
-    """Тест добавления None в категорию должно вызывать ошибку"""
+    """Тест добавления None в категорию должно обрабатывать ошибку"""
     category = Category("Магазин", "Описание", [])
     
-    try:
-        category.add_product(None)
-        assert False, "Должно было быть исключение TypeError"
-    except TypeError as e:
-        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+    # Теперь add_product обрабатывает исключения внутри, не передает их дальше
+    initial_count = len(category._get_products_list())
+    category.add_product(None)
+    
+    # Товар не должен быть добавлен
+    assert len(category._get_products_list()) == initial_count
 
 
 def test_add_number_to_category_should_raise_error():
-    """Тест добавления числа в категорию должно вызывать ошибку"""
+    """Тест добавления числа в категорию должно обрабатывать ошибку"""
     category = Category("Магазин", "Описание", [])
     
-    try:
-        category.add_product(123)
-        assert False, "Должно было быть исключение TypeError"
-    except TypeError as e:
-        assert "Можно добавлять только объекты класса Product или его наследников" in str(e)
+    # Теперь add_product обрабатывает исключения внутри, не передает их дальше
+    initial_count = len(category._get_products_list())
+    category.add_product(123)
+    
+    # Товар не должен быть добавлен
+    assert len(category._get_products_list()) == initial_count
 
 
 # Тесты для новой функциональности - абстрактные классы и миксины
