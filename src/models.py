@@ -3,6 +3,13 @@ import json
 from abc import ABC, abstractmethod
 
 
+class ZeroQuantityError(Exception):
+    """
+    Custom exception for products with zero quantity.
+    """
+    pass
+
+
 class BaseProduct(ABC):
     """
     Абстрактный базовый класс для всех продуктов.
@@ -176,6 +183,9 @@ class Product(CreationMixin, BaseProduct):
         price: float,
         quantity: int,
     ):
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+        
         self.name = name
         self.description = description
         self._price = price  # Приватный атрибут цены
@@ -302,7 +312,7 @@ class Category(BaseEntity):
 
     def add_product(self, product: Product) -> None:
         """
-        Добавляет товар в категорию с проверкой типа.
+        Добавляет товар в категорию с проверкой типа и обработкой ошибок.
 
         Args:
             product: Объект класса Product или его наследников для добавления
@@ -310,11 +320,24 @@ class Category(BaseEntity):
         Raises:
             TypeError: если переданный объект не является Product или его наследником
         """
-        if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+        try:
+            if not isinstance(product, Product):
+                raise TypeError("Можно добавлять только объекты класса Product или его наследников")
 
-        self.__products.append(product)
-        Category.product_count += 1
+            if product.quantity == 0:
+                raise ZeroQuantityError("Товар с нулевым количеством не может быть добавлен в категорию")
+
+            self.__products.append(product)
+            Category.product_count += 1
+            print(f"Tovar '{product.name}' uspeshno dobavlen v kategoriyu")
+        except ZeroQuantityError as e:
+            print(f"Oshibka: {e}")
+        except TypeError as e:
+            print(f"Oshibka tipa: {e}")
+        else:
+            print("Tovar uspeshno dobavlen")
+        finally:
+            print("Obrabotka dobavleniya tovara zavershena")
 
     @property
     def products(self) -> str:
@@ -349,6 +372,23 @@ class Category(BaseEntity):
             Объект ProductIterator для перебора товаров
         """
         return ProductIterator(self)
+
+    def get_average_price(self) -> float:
+        """
+        Вычисляет среднюю цену всех товаров в категории.
+
+        Returns:
+            Средняя цена товаров или 0, если товаров нет
+        """
+        try:
+            if not self.__products:
+                return 0.0
+            
+            total_price = sum(product.price for product in self.__products)
+            average_price = total_price / len(self.__products)
+            return average_price
+        except ZeroDivisionError:
+            return 0.0
 
     def __str__(self) -> str:
         """
