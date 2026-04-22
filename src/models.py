@@ -3,6 +3,13 @@ import json
 from abc import ABC, abstractmethod
 
 
+class ZeroQuantityError(Exception):
+    """
+    Custom exception for products with zero quantity.
+    """
+    pass
+
+
 class BaseProduct(ABC):
     """
     Абстрактный базовый класс для всех продуктов.
@@ -176,6 +183,9 @@ class Product(CreationMixin, BaseProduct):
         price: float,
         quantity: int,
     ):
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+        
         self.name = name
         self.description = description
         self._price = price  # Приватный атрибут цены
@@ -349,6 +359,23 @@ class Category(BaseEntity):
             Объект ProductIterator для перебора товаров
         """
         return ProductIterator(self)
+
+    def get_average_price(self) -> float:
+        """
+        Вычисляет среднюю цену всех товаров в категории.
+
+        Returns:
+            Средняя цена товаров или 0, если товаров нет
+        """
+        try:
+            if not self.__products:
+                return 0.0
+            
+            total_price = sum(product.price for product in self.__products)
+            average_price = total_price / len(self.__products)
+            return average_price
+        except ZeroDivisionError:
+            return 0.0
 
     def __str__(self) -> str:
         """
