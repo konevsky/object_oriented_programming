@@ -1,4 +1,4 @@
-from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json, BaseProduct, CreationMixin, Order, BaseEntity
+from src.models import Category, Product, Smartphone, LawnGrass, load_categories_from_json, BaseProduct, CreationMixin, Order, BaseEntity, ZeroQuantityError
 from abc import ABC
 import json
 import tempfile
@@ -987,3 +987,88 @@ def test_order_edge_case_exact_stock():
     assert order.quantity == 5
     assert order.total_cost == 500.0  # 100.0 * 5
     assert product.quantity == 0  # Все товары забраны
+
+
+def test_product_zero_quantity_error():
+    """Тест создания товара с нулевым количеством"""
+    try:
+        product = Product("Товар", "Описание", 100.0, 0)
+        assert False, "Должно было быть исключение ZeroQuantityError"
+    except ZeroQuantityError as e:
+        assert "Товар с нулевым количеством не может быть добавлен" in str(e)
+
+
+def test_category_average_price_with_products():
+    """Тест расчета средней цены в категории с товарами"""
+    product1 = Product("Товар 1", "Описание 1", 100.0, 5)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 3)
+    product3 = Product("Товар 3", "Описание 3", 300.0, 2)
+    
+    category = Category("Test", "Описание", [product1, product2, product3])
+    
+    # Средняя цена: (100 + 200 + 300) / 3 = 200
+    assert category.get_average_price() == 200.0
+
+
+def test_category_average_price_empty():
+    """Тест расчета средней цены в пустой категории"""
+    category = Category("Test", "Описание", [])
+    
+    # Должно вернуть 0.0
+    assert category.get_average_price() == 0.0
+
+
+def test_category_average_price_single_product():
+    """Тест расчета средней цены с одним товаром"""
+    product = Product("Товар", "Описание", 150.0, 5)
+    category = Category("Test", "Описание", [product])
+    
+    # Средняя цена должна быть равна цене одного товара
+    assert category.get_average_price() == 150.0
+
+
+def test_category_add_product_zero_quantity():
+    """Тест добавления товара с нулевым количеством в категорию"""
+    category = Category("Test", "Описание", [])
+    
+    # Создадим товар с нулевым количеством через непрямое изменение
+    product = Product("Товар", "Описание", 100.0, 1)
+    product.quantity = 0  # Вынужденное изменение для теста
+    
+    # Добавление должно обработать ошибку без краша
+    category.add_product(product)
+    
+    # Товар не должен быть добавлен
+    assert len(category._get_products_list()) == 0
+
+
+def test_category_add_product_normal_quantity():
+    """Тест добавления товара с нормальным количеством в категорию"""
+    category = Category("Test", "Описание", [])
+    product = Product("Товар", "Описание", 100.0, 5)
+    
+    # Добавление должно сработать успешно
+    category.add_product(product)
+    
+    # Товар должен быть добавлен
+    assert len(category._get_products_list()) == 1
+
+
+def test_category_add_product_wrong_type():
+    """Тест добавления объекта неверного типа в категорию"""
+    category = Category("Test", "Описание", [])
+    
+    # Добавление неверного типа должно обработать ошибку
+    category.add_product("не товар")
+    
+    # Ничего не должно быть добавлено
+    assert len(category._get_products_list()) == 0
+
+
+def test_zero_quantity_error_inheritance():
+    """Тест наследования ZeroQuantityError"""
+    assert issubclass(ZeroQuantityError, Exception)
+    
+    # Проверка создания исключения
+    error = ZeroQuantityError("Test message")
+    assert str(error) == "Test message"
